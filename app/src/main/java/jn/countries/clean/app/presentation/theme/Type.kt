@@ -1,4 +1,4 @@
-package jn.countries.clean.app.ui.theme
+package jn.countries.clean.app.presentation.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle
