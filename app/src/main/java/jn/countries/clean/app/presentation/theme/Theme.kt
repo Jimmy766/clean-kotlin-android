@@ -1,4 +1,4 @@
-package jn.countries.clean.app.ui.theme
+package jn.countries.clean.app.presentation.theme
 
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
