@@ -1,7 +1,6 @@
 package jn.countries.clean.app.data.remote.api
 
 import jn.countries.clean.app.data.remote.dto.CountryDto
-import kotlinx.coroutines.flow.Flow
 import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.Path
