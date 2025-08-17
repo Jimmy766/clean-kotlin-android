@@ -2,7 +2,6 @@ package jn.countries.clean.app.presentation.screen
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -16,8 +15,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -29,6 +26,7 @@ import androidx.compose.material3.SearchBar
 import androidx.compose.material3.SearchBarDefaults.InputField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -36,29 +34,38 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-
-data class Mock(
-  val id: String,
-  val name: String,
-  val capital: String?,
-  val isFavorite: Boolean = false)
-
-val mocks =
-    (1..20).map {
-        Mock(
-            id = it.toString(),
-            name = "Country $it",
-            capital = "Capital $it",
-            isFavorite = it % 2 == 0
-        )
-    }
+import androidx.lifecycle.viewmodel.compose.viewModel
+import coil.compose.AsyncImage
+import coil.decode.SvgDecoder
+import coil.request.ImageRequest
+import jn.countries.clean.app.R
+import jn.countries.clean.app.domain.model.Country
+import jn.countries.clean.app.presentation.viewmodel.CountriesViewModel
 
 
 @Composable
 fun HomeScreen(modifier: Modifier) {
+
+  val viewModel:CountriesViewModel = viewModel()
+  val uiState by viewModel.uiState.collectAsState()
+
+  if (uiState.isLoading) {
+
+    Text(text = "Cargando países...")
+    return
+  }
+  if (uiState.error != null) {
+    Text(text = "Error: ${uiState.error}")
+    return
+  }
 
   Column(
     modifier = modifier
@@ -71,7 +78,8 @@ fun HomeScreen(modifier: Modifier) {
       text = "Countries",
       style = MaterialTheme.typography.headlineMedium,
       fontWeight = FontWeight.Bold,
-      modifier = Modifier.padding(top= 8.dp)
+      modifier = Modifier
+        .padding(top = 8.dp)
         .align(Alignment.CenterHorizontally)
     )
     InputSearchBar(
@@ -80,7 +88,7 @@ fun HomeScreen(modifier: Modifier) {
       modifier = Modifier.fillMaxWidth()
     )
     CountriesList(
-      countries = mocks,
+      countries = uiState.countries,
       modifier = modifier
     )
 
@@ -137,13 +145,13 @@ private fun InputSearchBar(
 @Composable
 private fun CountriesList(
   modifier: Modifier = Modifier,
-  countries: List<Mock>,
+  countries: List<Country>,
 ) {
   LazyColumn(
     modifier = modifier,
     verticalArrangement = Arrangement.spacedBy(8.dp),
   ) {
-    items(items = countries, key = {it.id})
+    items(items = countries, key = {it.code})
     { country ->
       CountryItem(
         country = country,
@@ -156,7 +164,7 @@ private fun CountriesList(
 
 @Composable
 private fun CountryItem(
-  country: Mock,
+  country: Country,
   onClick: () -> Unit,
   onFavoriteClick: () -> Unit
 ) {
@@ -176,10 +184,17 @@ private fun CountryItem(
         .padding(16.dp),
       verticalAlignment = Alignment.CenterVertically
     ) {
-      Box (
+      AsyncImage (
+        model = ImageRequest.Builder(LocalContext.current)
+          .data(country.flags.svg)
+          .decoderFactory(SvgDecoder.Factory())
+          .crossfade(true)
+          .build(),
+        contentDescription = "Bandera de ${country.name.common}",
         modifier = Modifier
           .size(48.dp)
           .clip(RoundedCornerShape(4.dp)),
+        contentScale = ContentScale.Fit,
       )
 
       Spacer(modifier = Modifier.width(16.dp))
@@ -188,7 +203,7 @@ private fun CountryItem(
         modifier = Modifier.weight(1f)
       ) {
         Text(
-          text = country.name,
+          text = country.name.official,
           style = MaterialTheme.typography.titleMedium,
           fontWeight = FontWeight.Bold,
           maxLines = 1,
@@ -196,7 +211,7 @@ private fun CountryItem(
         )
 
         Text(
-          text = country.name,
+          text = country.name.common,
           style = MaterialTheme.typography.bodyMedium,
           color = MaterialTheme.colorScheme.onSurfaceVariant,
           maxLines = 1,
@@ -211,24 +226,21 @@ private fun CountryItem(
       }
 
       IconButton(
-        onClick = onFavoriteClick
+        onClick = onFavoriteClick,
+        modifier = Modifier.size(30.dp)
       ) {
         Icon(
           imageVector = if (country.isFavorite) {
-            Icons.Default.Favorite
+            ImageVector.vectorResource(id = R.drawable.fav_filled)
           } else {
-            Icons.Default.FavoriteBorder
+            ImageVector.vectorResource(id = R.drawable.fav_outline)
           },
           contentDescription = if (country.isFavorite) {
             "Eliminar de favoritos"
           } else {
             "Añadir a favoritos"
           },
-          tint = if (country.isFavorite) {
-            MaterialTheme.colorScheme.error
-          } else {
-            MaterialTheme.colorScheme.onSurfaceVariant
-          }
+          tint = Color.Unspecified
         )
       }
     }
