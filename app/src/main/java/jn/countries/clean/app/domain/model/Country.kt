@@ -4,6 +4,7 @@ import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
 import java.text.NumberFormat
 import java.util.Locale
+import kotlin.text.format
 
 @Parcelize
 data class Country(
@@ -45,8 +46,8 @@ data class Country(
     
     fun getFormattedArea(): String? {
         return area?.let {
-            val f = NumberFormat.getNumberInstance(Locale.getDefault()).format(it)
-            String.format("%.0f km²", f)
+            val formatted = NumberFormat.getNumberInstance(Locale.getDefault()).format(it)
+            "$formatted km²"
         }
     }
 }
