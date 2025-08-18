@@ -13,9 +13,9 @@ interface CountryRepository {
 
     fun getFavoriteCountries(): Flow<List<Country>>
 
-    suspend fun addToFavorites(country: Country)
+    fun addToFavorites(country: Country): Flow<Boolean>
 
-    suspend fun removeFromFavorites(countryCode: String)
+    fun removeFromFavorites(countryCode: String):Flow<Boolean>
     
     fun isCountryFavorite(countryCode: String): Flow<Boolean>
     
