@@ -8,6 +8,7 @@ object CountriesDestinations {
 
   const val COUNTRIES_LIST = "countries_list"
   const val COUNTRY_DETAIL = "country_detail/{countryCode}"
+  const val COUNTRY_FAVORITES = "country_favorites"
 
   val countryDetailArguments: List<NamedNavArgument> = listOf(
     navArgument("countryCode") {

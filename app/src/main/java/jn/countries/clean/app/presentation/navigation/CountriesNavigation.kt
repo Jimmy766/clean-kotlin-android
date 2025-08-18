@@ -6,6 +6,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import jn.countries.clean.app.presentation.screen.CountryDetailScreen
+import jn.countries.clean.app.presentation.screen.FavoritesScreen
 import jn.countries.clean.app.presentation.screen.HomeScreen
 
 @Composable
@@ -36,6 +37,16 @@ fun CountriesNavigation(
                 countryCode = countryCode,
                 onBackClick = {
                     navController.popBackStack()
+                }
+            )
+        }
+
+        composable(CountriesDestinations.COUNTRY_FAVORITES) {
+            FavoritesScreen(
+                onCountryClick = { countryCode ->
+                    navController.navigate(
+                        CountriesDestinations.countryDetail(countryCode)
+                    )
                 }
             )
         }
