@@ -129,7 +129,7 @@ private fun CountryHeader(
     country: Country
 ) {
     Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
+        horizontalAlignment = Alignment.Start,
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         AsyncImage(
