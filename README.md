@@ -46,5 +46,4 @@ The app targets Android API 29+ and demonstrates modern Android development with
 The application uses the REST Countries API (https://restcountries.com/v3.1/) as its data source and implements proper error handling, loading states, and offline capabilities. The codebase serves as a reference implementation for clean architecture principles in Android development.
 
 Wiki pages you might want to explore:
-- [Overview (Jimmy766/clean-kotlin-android)](/wiki/Jimmy766/clean-kotlin-android#1)
-- [UI Screens and ViewModels (Jimmy766/clean-kotlin-android)](/wiki/Jimmy766/clean-kotlin-android#6.2)
+- [Overview (Jimmy766/clean-kotlin-android)](https://deepwiki.com/Jimmy766/clean-kotlin-android/1-overview)
