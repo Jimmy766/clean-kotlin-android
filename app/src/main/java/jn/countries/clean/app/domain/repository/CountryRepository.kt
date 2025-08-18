@@ -7,7 +7,7 @@ interface CountryRepository {
     
     fun getAllCountries(): Flow<List<Country>>
 
-    suspend fun searchCountries(query: String): Result<List<Country>>
+    fun searchCountries(query: String): Flow<List<Country>>
 
     fun getCountryByCode(countryCode: String): Flow<Country?>
 

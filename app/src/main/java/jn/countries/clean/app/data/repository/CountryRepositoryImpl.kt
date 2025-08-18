@@ -30,8 +30,14 @@ class CountryRepositoryImpl @Inject constructor(
         }
     }
     
-    override suspend fun searchCountries(query: String): Result<List<Country>> {
-        TODO("Not yet implemented")
+    override fun searchCountries(query: String): Flow<List<Country>> = flow {
+        val result = apiService.searchCountriesByName(query)
+        if(result.isSuccessful && result.body() != null) {
+            val dtos = result.body()!!
+            emit(dtos.map { it.toDomain() })
+        } else {
+            emit(emptyList<Country>())
+        }
     }
     
     override fun getCountryByCode(code: String): Flow<Country?> = flow{

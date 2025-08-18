@@ -11,7 +11,7 @@ interface CountriesApiService {
     @GET("all?fields=cca2,name,flags,population,region,subregion,capital,area,languages,currencies")
     suspend fun getAllCountries(): Response<List<CountryDto>>
     
-    @GET("name/{name}?fields=cca2,name,flags,population,region,subregion,capital,area,languages,currencies")
+    @GET("name/{name}")
     suspend fun searchCountriesByName(
         @Path("name") name: String
     ): Response<List<CountryDto>>
