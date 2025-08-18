@@ -4,7 +4,8 @@ plugins {
   alias(libs.plugins.kotlin.compose)
   alias(libs.plugins.kotlin.parcelize)
   alias(libs.plugins.kotlin.serialization)
-//  alias(libs.plugins.kotlin.kapt)
+  alias(libs.plugins.kotlin.kapt)
+  alias (libs.plugins.android.hilt)
 }
 
 android {
@@ -59,10 +60,15 @@ dependencies {
   implementation(libs.retrofit2)
   implementation(libs.retrofit2.gson)
   implementation(libs.okhttp3)
+  implementation(libs.okhttp3.logging.interceptor)
   implementation(libs.androidx.viewmodel.compose)
   implementation(libs.androidx.runtime.compose)
   implementation(libs.kotlin.serialization.json)
   implementation(libs.retrofit2.serialization)
   implementation(libs.coil)
   implementation(libs.coil.svg)
+  implementation(libs.navigation.compose)
+  implementation(libs.hilt)
+  kapt(libs.hilt.compiler)
+  implementation(libs.hilt.navigation.compose)
 }

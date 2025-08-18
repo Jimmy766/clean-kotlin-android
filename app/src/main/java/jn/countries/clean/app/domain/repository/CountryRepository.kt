@@ -9,7 +9,7 @@ interface CountryRepository {
 
     suspend fun searchCountries(query: String): Result<List<Country>>
 
-    suspend fun getCountryByCode(countryCode: String): Result<Country?>
+    fun getCountryByCode(countryCode: String): Flow<Country?>
 
     fun getFavoriteCountries(): Flow<List<Country>>
 

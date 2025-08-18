@@ -6,8 +6,11 @@ import jn.countries.clean.app.domain.model.Country
 import jn.countries.clean.app.domain.repository.CountryRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import javax.inject.Inject
+import javax.inject.Singleton
 
-class CountryRepositoryImpl (
+@Singleton
+class CountryRepositoryImpl @Inject constructor(
     private val apiService: CountriesApiService,
 ) : CountryRepository {
     
@@ -25,8 +28,14 @@ class CountryRepositoryImpl (
         TODO("Not yet implemented")
     }
     
-    override suspend fun getCountryByCode(code: String): Result<Country?> {
-        TODO("Not yet implemented")
+    override fun getCountryByCode(code: String): Flow<Country?> = flow{
+        val result = apiService.getCountryByCode(code)
+        if(result.isSuccessful && result.body() != null) {
+            val dtos = result.body()!!
+            emit(dtos.firstOrNull()?.toDomain())
+        } else {
+            emit(null)
+        }
     }
     
     override fun getFavoriteCountries(): Flow<List<Country>> {

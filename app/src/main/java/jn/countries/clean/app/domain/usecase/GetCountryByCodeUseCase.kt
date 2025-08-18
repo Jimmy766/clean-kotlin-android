@@ -8,10 +8,11 @@ import kotlinx.coroutines.flow.flowOn
 import javax.inject.Inject
 
 
-class GetAllCountriesUseCase @Inject constructor(
-    private val countryRepository: CountryRepository
+class GetCountryByCodeUseCase @Inject constructor(
+  private val countryRepository: CountryRepository
 ) {
-    operator fun invoke(): Flow<List<Country>> {
-        return countryRepository.getAllCountries().flowOn(Dispatchers.IO)
-    }
+
+  operator fun invoke(countryCode: String): Flow<Country?> {
+    return countryRepository.getCountryByCode(countryCode.trim().uppercase()).flowOn(Dispatchers.IO)
+  }
 }
