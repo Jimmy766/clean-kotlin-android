@@ -16,7 +16,7 @@ interface CountriesApiService {
         @Path("name") name: String
     ): Response<List<CountryDto>>
     
-    @GET("alpha/{code}?fields=cca2,name,flags,population,region,subregion,capital,area,languages,currencies")
+    @GET("alpha/{code}")
     suspend fun getCountryByCode(
         @Path("code") code: String
     ): Response<List<CountryDto>>
