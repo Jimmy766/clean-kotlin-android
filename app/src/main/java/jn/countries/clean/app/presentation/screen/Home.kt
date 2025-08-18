@@ -26,7 +26,6 @@ import androidx.compose.material3.SearchBar
 import androidx.compose.material3.SearchBarDefaults.InputField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -42,7 +41,8 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import coil.decode.SvgDecoder
 import coil.request.ImageRequest
@@ -52,10 +52,13 @@ import jn.countries.clean.app.presentation.viewmodel.CountriesViewModel
 
 
 @Composable
-fun HomeScreen(modifier: Modifier) {
+fun HomeScreen(
+  modifier: Modifier = Modifier,
+  onCountryClick: (String) -> Unit,
+  viewModel: CountriesViewModel = hiltViewModel()
+) {
 
-  val viewModel:CountriesViewModel = viewModel()
-  val uiState by viewModel.uiState.collectAsState()
+  val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
   if (uiState.isLoading) {
 
@@ -79,7 +82,7 @@ fun HomeScreen(modifier: Modifier) {
       style = MaterialTheme.typography.headlineMedium,
       fontWeight = FontWeight.Bold,
       modifier = Modifier
-        .padding(top = 8.dp)
+        .padding(top = 16.dp)
         .align(Alignment.CenterHorizontally)
     )
     InputSearchBar(
@@ -87,9 +90,13 @@ fun HomeScreen(modifier: Modifier) {
       onQueryChange = { searchQuery = it },
       modifier = Modifier.fillMaxWidth()
     )
+    Spacer(modifier = Modifier.size(16.dp))
     CountriesList(
       countries = uiState.countries,
-      modifier = modifier
+      modifier = modifier,
+        onCountryClick = { countryCode ->
+            onCountryClick(countryCode)
+        }
     )
 
   }
@@ -146,6 +153,7 @@ private fun InputSearchBar(
 private fun CountriesList(
   modifier: Modifier = Modifier,
   countries: List<Country>,
+  onCountryClick: (String) -> Unit,
 ) {
   LazyColumn(
     modifier = modifier,
@@ -155,7 +163,7 @@ private fun CountriesList(
     { country ->
       CountryItem(
         country = country,
-        onClick = {  },
+        onClick = { onCountryClick(country.code) },
         onFavoriteClick = { }
       )
     }
