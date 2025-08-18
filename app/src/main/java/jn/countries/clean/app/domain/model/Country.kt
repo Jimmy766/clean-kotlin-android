@@ -2,6 +2,8 @@ package jn.countries.clean.app.domain.model
 
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
+import java.text.NumberFormat
+import java.util.Locale
 
 @Parcelize
 data class Country(
@@ -16,13 +18,13 @@ data class Country(
     val languages: Map<String, String>?,
     val currencies: Map<String, Currency>?,
     val isFavorite: Boolean = false,
+    val independent: Boolean = false,
+    val unMember: Boolean = false,
+    val timezones: List<String>? = null,
+    val coatOfArms : CountryCoatOfArms? = null,
+    val car: Car? = null,
 ) : Parcelable {
 
-    fun getDisplayName(): String = name.common
-    
-    fun getFlagUrl(): String = flags.png
-    fun getPrimaryCapital(): String? = capital?.firstOrNull()
-    
     fun getLanguagesString(): String? {
         return languages?.values?.joinToString(", ")
     }
@@ -42,6 +44,9 @@ data class Country(
     }
     
     fun getFormattedArea(): String? {
-        return area?.let { String.format("%.0f km²", it) }
+        return area?.let {
+            val f = NumberFormat.getNumberInstance(Locale.getDefault()).format(it)
+            String.format("%.0f km²", f)
+        }
     }
 }
