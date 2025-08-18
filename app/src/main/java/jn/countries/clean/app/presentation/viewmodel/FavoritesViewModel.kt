@@ -6,6 +6,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import jn.countries.clean.app.domain.model.Country
 import jn.countries.clean.app.domain.usecase.GetFavoriteCountriesUseCase
 import jn.countries.clean.app.domain.usecase.RemoveFromFavoritesUseCase
+import jn.countries.clean.app.domain.util.Resource
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -38,11 +39,26 @@ class FavoritesViewModel @Inject constructor(
                     )
                 }
                 .collect { favoriteCountries ->
-                    _uiState.value = _uiState.value.copy(
-                        favoriteCountries = favoriteCountries,
-                        isLoading = false,
-                        error = null
-                    )
+                    when (favoriteCountries) {
+                        is Resource.Success -> {
+                            _uiState.value = _uiState.value.copy(
+                                isLoading = false,
+                                error = null,
+                                favoriteCountries = favoriteCountries.data
+                            )
+                            return@collect
+                        }
+                        is Resource.Error -> {
+                            _uiState.value = _uiState.value.copy(
+                                isLoading = false,
+                                error = favoriteCountries.message
+                            )
+                            return@collect
+                        }
+                        is Resource.Loading -> {
+                            _uiState.value = _uiState.value.copy(isLoading = true, error = null)
+                        }
+                    }
                 }
         }
     }

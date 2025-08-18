@@ -10,6 +10,7 @@ import jn.countries.clean.app.domain.usecase.GetAllCountriesUseCase
 import jn.countries.clean.app.domain.usecase.GetFavoriteCountriesUseCase
 import jn.countries.clean.app.domain.usecase.RemoveFromFavoritesUseCase
 import jn.countries.clean.app.domain.usecase.SearchCountriesUseCase
+import jn.countries.clean.app.domain.util.Resource
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -56,18 +57,48 @@ class CountriesViewModel @Inject constructor(
     viewModelScope.launch {
       _uiState.value = _uiState.value.copy(isLoading = true, error = null)
       getFavoriteCountriesUseCase().zip(getAllCountriesUseCase()) { favoriteCountries, allCountries ->
-        val indexedFavorites = favoriteCountries.associateBy { it.code }
-        allCountries.forEach { country ->
-          country.isFavorite = indexedFavorites[country.code] != null
+        if (favoriteCountries !is Resource.Success) {
+          Log.e("CountriesViewModel", "loadCountries: Error fetching favorite countries")
+          return@zip allCountries
+        }
+        val indexedFavorites = favoriteCountries.data.associateBy { it.code }
+        when (allCountries) {
+            is Resource.Success -> {
+              allCountries.data.forEach { country ->
+                country.isFavorite = indexedFavorites[country.code] != null
+              }
+                Log.d("CountriesViewModel", "loadCountries: Success")
+            }
+            else -> {
+                Log.e("CountriesViewModel", "loadCountries: Error ")
+            }
         }
         allCountries
 
       }.collect {
-        _uiState.value = _uiState.value.copy(
-          countries = it,
-          isLoading = false,
-          error = null
-        )
+
+        when (it) {
+            is Resource.Error -> {
+                _uiState.value = _uiState.value.copy(
+                countries = emptyList(),
+                isLoading = false,
+                error = it.message
+                )
+                Log.e("CountriesViewModel", "loadCountries: ${it.message}")
+            }
+            is Resource.Loading -> {
+                _uiState.value = _uiState.value.copy(isLoading = true, error = null)
+            }
+            is Resource.Success -> {
+              _uiState.value = _uiState.value.copy(
+                countries = it.data,
+                isLoading = false,
+                error = null
+              )
+                Log.d("CountriesViewModel", "loadCountries: Success")
+            }
+        }
+
       }
     }
   }
@@ -80,11 +111,20 @@ class CountriesViewModel @Inject constructor(
     viewModelScope.launch {
       addToFavoritesUseCase(country)
         .collect {
-          if (it) {
-            _uiFavoriteState.value = _uiFavoriteState.value.copy(
-              code = country.code,
-              isFavorite = true
-            )
+          when (it) {
+            is Resource.Error -> {
+              Log.e("CountriesViewModel", "addToFavorites: ${it.message}")
+            }
+            is Resource.Loading -> {
+              Log.d("CountriesViewModel", "addToFavorites: Loading")
+            }
+            is Resource.Success -> {
+              _uiFavoriteState.value = _uiFavoriteState.value.copy(
+                code = country.code,
+                isFavorite = true
+              )
+              Log.d("CountriesViewModel", "addToFavorites: Success")
+            }
           }
           Log.d("CountriesViewModel", "addToFavorites: ${country.code}")
         }
@@ -95,12 +135,21 @@ class CountriesViewModel @Inject constructor(
     viewModelScope.launch {
       removeFromFavoritesUseCase(countryCode)
         .collect {
-          if (it) {
-            _uiFavoriteState.value = _uiFavoriteState.value.copy(
-              code = countryCode,
-              isFavorite = false
-            )
-          }
+            when (it) {
+                is Resource.Error -> {
+                Log.e("CountriesViewModel", "removeFromFavorites: ${it.message}")
+                }
+                is Resource.Loading -> {
+                Log.d("CountriesViewModel", "removeFromFavorites: Loading")
+                }
+                is Resource.Success -> {
+                  _uiFavoriteState.value = _uiFavoriteState.value.copy(
+                    code = countryCode,
+                    isFavorite = false
+                  )
+                Log.d("CountriesViewModel", "removeFromFavorites: Success")
+                }
+            }
           Log.d("CountriesViewModel", "removeFromFavorites: $countryCode")
         }
     }
@@ -114,11 +163,29 @@ class CountriesViewModel @Inject constructor(
       }
       _uiState.value = _uiState.value.copy(isLoading = true, error = null)
       searchCountriesUseCase(query).collect { result ->
-        _uiState.value = _uiState.value.copy(
-          countries = result,
-          isLoading = false,
-          error = null
-        )
+
+        when (result) {
+            is Resource.Error -> {
+                _uiState.value = _uiState.value.copy(
+                countries = emptyList(),
+                isLoading = false,
+                error = result.message
+                )
+                Log.e("CountriesViewModel", "searchCountries: ${result.message}")
+            }
+            is Resource.Loading -> {
+                _uiState.value = _uiState.value.copy(isLoading = true, error = null)
+                Log.d("CountriesViewModel", "searchCountries: Loading")
+            }
+            is Resource.Success -> {
+              _uiState.value = _uiState.value.copy(
+                countries = result.data,
+                isLoading = false,
+                error = null
+              )
+                Log.d("CountriesViewModel", "searchCountries: Success")
+            }
+        }
       }
     }
   }

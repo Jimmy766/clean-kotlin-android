@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jn.countries.clean.app.domain.model.Country
 import jn.countries.clean.app.domain.usecase.GetCountryByCodeUseCase
+import jn.countries.clean.app.domain.util.Resource
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -32,11 +33,35 @@ class CountryDetailViewModel @Inject constructor(
           )
         }
         .collect { country ->
-          _uiState.value = _uiState.value.copy(
-            country = country,
-            isLoading = false,
-            error = null
-          )
+
+          when (country) {
+            is Resource.Success -> {
+
+              if (country.data == null) {
+                _uiState.value = _uiState.value.copy(
+                  isLoading = false,
+                  error = "País no encontrado"
+                )
+                return@collect
+              }
+            }
+            is Resource.Error -> {
+              _uiState.value = _uiState.value.copy(
+                isLoading = false,
+                error = country.message
+              )
+              return@collect
+            }
+
+            is Resource.Loading<*> -> {
+                _uiState.value = _uiState.value.copy(
+                    isLoading = true,
+                    error = null
+                )
+                return@collect
+            }
+          }
+
         }
     }
   }
