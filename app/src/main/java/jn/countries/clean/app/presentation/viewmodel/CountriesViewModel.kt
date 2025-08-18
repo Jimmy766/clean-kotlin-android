@@ -9,19 +9,26 @@ import jn.countries.clean.app.domain.usecase.AddToFavoritesUseCase
 import jn.countries.clean.app.domain.usecase.GetAllCountriesUseCase
 import jn.countries.clean.app.domain.usecase.GetFavoriteCountriesUseCase
 import jn.countries.clean.app.domain.usecase.RemoveFromFavoritesUseCase
+import jn.countries.clean.app.domain.usecase.SearchCountriesUseCase
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.zip
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+@OptIn(FlowPreview::class)
 @HiltViewModel
 class CountriesViewModel @Inject constructor(
   private val getAllCountriesUseCase: GetAllCountriesUseCase,
   private val getFavoriteCountriesUseCase: GetFavoriteCountriesUseCase,
   private val addToFavoritesUseCase: AddToFavoritesUseCase,
-  private val removeFromFavoritesUseCase: RemoveFromFavoritesUseCase
+  private val removeFromFavoritesUseCase: RemoveFromFavoritesUseCase,
+  private val searchCountriesUseCase: SearchCountriesUseCase,
 ) : ViewModel() {
 
   private val _uiState = MutableStateFlow(CountriesUiState())
@@ -30,8 +37,19 @@ class CountriesViewModel @Inject constructor(
   private val _uiFavoriteState = MutableStateFlow(FavoriteCountryState())
   val uiFavoriteState: StateFlow<FavoriteCountryState> = _uiFavoriteState.asStateFlow()
 
+  private val _uiSearchState = MutableStateFlow("")
+  val uiSearchState: StateFlow<String> = _uiSearchState.asStateFlow()
+
   init {
-    loadCountries()
+    viewModelScope.launch {
+      _uiSearchState.debounce(500L).distinctUntilChanged().collectLatest {
+        if (it.isNotBlank()) {
+          searchCountries(it)
+        } else {
+          loadCountries()
+        }
+      }
+    }
   }
 
   fun loadCountries() {
@@ -52,6 +70,10 @@ class CountriesViewModel @Inject constructor(
         )
       }
     }
+  }
+
+  fun setSearchQuery(query: String) {
+    _uiSearchState.value = query
   }
 
   fun addToFavorites(country: Country) {
@@ -81,6 +103,23 @@ class CountriesViewModel @Inject constructor(
           }
           Log.d("CountriesViewModel", "removeFromFavorites: $countryCode")
         }
+    }
+  }
+
+  fun searchCountries(query: String) {
+    viewModelScope.launch {
+      if (query.isBlank()) {
+        loadCountries()
+        return@launch
+      }
+      _uiState.value = _uiState.value.copy(isLoading = true, error = null)
+      searchCountriesUseCase(query).collect { result ->
+        _uiState.value = _uiState.value.copy(
+          countries = result,
+          isLoading = false,
+          error = null
+        )
+      }
     }
   }
 }
