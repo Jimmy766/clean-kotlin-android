@@ -1,4 +1,4 @@
-package jn.countries.clean.app.data.di
+package jn.countries.clean.app.di
 
 import dagger.Binds
 import dagger.Module

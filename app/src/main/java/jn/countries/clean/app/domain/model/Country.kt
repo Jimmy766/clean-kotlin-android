@@ -18,7 +18,7 @@ data class Country(
     val area: Double?,
     val languages: Map<String, String>?,
     val currencies: Map<String, Currency>?,
-    val isFavorite: Boolean = false,
+    var isFavorite: Boolean = false,
     val independent: Boolean = false,
     val unMember: Boolean = false,
     val timezones: List<String>? = null,
