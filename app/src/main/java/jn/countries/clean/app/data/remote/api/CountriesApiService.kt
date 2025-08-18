@@ -8,7 +8,7 @@ import retrofit2.http.Path
 
 interface CountriesApiService {
 
-    @GET("all?fields=cca2,name,flags,population,region,subregion,capital,area,languages,currencies,independent,unMember")
+    @GET("all?fields=cca2,name,flags,population,region,subregion,capital,area,languages,currencies")
     suspend fun getAllCountries(): Response<List<CountryDto>>
     
     @GET("name/{name}")
