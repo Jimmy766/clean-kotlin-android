@@ -37,13 +37,13 @@ class CountryDetailViewModel @Inject constructor(
           when (country) {
             is Resource.Success -> {
 
-              if (country.data == null) {
+
                 _uiState.value = _uiState.value.copy(
                   isLoading = false,
-                  error = "País no encontrado"
+                  error = null,
+                  country = country.data
                 )
                 return@collect
-              }
             }
             is Resource.Error -> {
               _uiState.value = _uiState.value.copy(
